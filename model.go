@@ -25,6 +25,8 @@ const (
 	Normal Mode = iota
 	Insert
 	Edit
+	ConfirmDelete
+	Deleted
 )
 
 type Size struct {
@@ -89,6 +91,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			case 'i':
 				m.Mode = Insert
+
+			case 'd':
+				if len(m.Notes) > 0 {
+					m.Mode = ConfirmDelete
+				}
 			}
 
 		case Insert:
@@ -97,6 +104,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Notes = append(m.Notes, Note{Content: string(m.NewNote)})
 				m.NewNote = nil
 				m.Mode = Normal
+				// Focus the last added item.
+				m.Focused = len(m.Notes) - 1
 
 			case "esc":
 				m.NewNote = nil
@@ -128,6 +137,34 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
+		case ConfirmDelete:
+			switch msg.String() {
+			case "enter", "y":
+				// NOTE: Move this logic to a method (i.e. Notes.delete(n)).
+				if len(m.Notes) == 1 {
+					m.Notes = nil
+				} else if m.Focused == 0 {
+					m.Notes = m.Notes[1:]
+				} else if m.Focused == len(m.Notes)-1 {
+					m.Notes = m.Notes[:len(m.Notes)-1]
+				} else {
+					m.Notes = append(m.Notes[:m.Focused], m.Notes[m.Focused+1:]...)
+				}
+				if m.Focused > 0 {
+					m.Focused--
+				}
+				m.Mode = Deleted
+
+			case "esc":
+				m.Mode = Normal
+
+			default:
+				m.Mode = Normal
+			}
+
+		case Deleted:
+			m.Mode = Normal
+
 		default:
 		}
 	}
@@ -136,7 +173,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() tea.View {
 	titleStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Yellow)
+		Foreground(lipgloss.Yellow).
+		Width(m.Width).
+		Align(lipgloss.Center).
+		MarginBottom(1)
 
 	noteStyle := lipgloss.NewStyle().
 		Width(m.Width-2).
@@ -150,12 +190,21 @@ func (m model) View() tea.View {
 		BorderForeground(lipgloss.Green).
 		Foreground(lipgloss.Green)
 
+	deleteStyle := noteStyle.
+		BorderForeground(lipgloss.Red).
+		Foreground(lipgloss.Red).
+		Margin(1)
+
+	warningStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Red).
+		PaddingTop(1).
+		PaddingLeft(2)
+
 	var s strings.Builder
 	s.WriteString(titleStyle.Render("  Notes"))
 
 	switch m.Mode {
 	case Normal:
-
 		for i, note := range m.Notes {
 			if i == m.Focused {
 				s.WriteString(focusedNoteStyle.Render(note.Content))
@@ -165,8 +214,15 @@ func (m model) View() tea.View {
 		}
 
 	case Insert:
-
 		fmt.Fprintf(&s, "\nNew note:\n\n > %s█", string(m.NewNote))
+
+	case ConfirmDelete:
+		s.WriteString(warningStyle.Render("Delete this note?\nThis action can't be undone."))
+		s.WriteString(deleteStyle.Render(m.Notes[m.Focused].Content))
+		s.WriteString(warningStyle.Render("Press y or <enter> to confirm. <esc> to cancel."))
+
+	case Deleted:
+		s.WriteString(deleteStyle.Render("Note deleted. Press any key."))
 
 	default:
 	}
