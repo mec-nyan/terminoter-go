@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"unicode"
 
 	tea "charm.land/bubbletea/v2"
@@ -173,61 +172,66 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() tea.View {
 	titleStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Yellow).
+		Foreground(lipgloss.Cyan).
 		Width(m.Width).
 		Align(lipgloss.Center).
 		MarginBottom(1)
 
 	noteStyle := lipgloss.NewStyle().
-		Width(m.Width-2).
+		Width(m.Width-4).
 		Foreground(lipgloss.Blue).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Blue).
 		Padding(0, 2).
-		Margin(1, 1, 0, 1)
+		Margin(0, 2)
 
 	focusedNoteStyle := noteStyle.
 		BorderForeground(lipgloss.Green).
 		Foreground(lipgloss.Green)
 
+	newNoteStyle := noteStyle.
+		BorderForeground(lipgloss.Cyan).
+		Foreground(lipgloss.White)
+
 	deleteStyle := noteStyle.
 		BorderForeground(lipgloss.Red).
-		Foreground(lipgloss.Red).
-		Margin(1)
+		Foreground(lipgloss.White)
 
 	warningStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Red).
 		PaddingTop(1).
-		PaddingLeft(2)
+		PaddingLeft(2).
+		MarginBottom(1)
 
-	var s strings.Builder
-	s.WriteString(titleStyle.Render("  Notes"))
+	title := titleStyle.Render("== Notes ==")
+
+	notes := []string{title}
 
 	switch m.Mode {
 	case Normal:
 		for i, note := range m.Notes {
 			if i == m.Focused {
-				s.WriteString(focusedNoteStyle.Render(note.Content))
+				notes = append(notes, focusedNoteStyle.Render(note.Content))
 			} else {
-				s.WriteString(noteStyle.Render(note.Content))
+				notes = append(notes, noteStyle.Render(note.Content))
 			}
 		}
 
 	case Insert:
-		fmt.Fprintf(&s, "\nNew note:\n\n > %s█", string(m.NewNote))
+		notes = append(notes, newNoteStyle.Render(fmt.Sprintf("New note:\n\n%s█", string(m.NewNote))))
 
 	case ConfirmDelete:
-		s.WriteString(warningStyle.Render("Delete this note?\nThis action can't be undone."))
-		s.WriteString(deleteStyle.Render(m.Notes[m.Focused].Content))
-		s.WriteString(warningStyle.Render("Press y or <enter> to confirm. <esc> to cancel."))
+		notes = append(notes, warningStyle.Render("Delete this note?\nThis action can't be undone  ."))
+		notes = append(notes, deleteStyle.Render(m.Notes[m.Focused].Content))
+		notes = append(notes, warningStyle.Render("Press 'y' or <enter> to confirm. <esc> to cancel."))
 
 	case Deleted:
-		s.WriteString(deleteStyle.Render("Note deleted. Press any key."))
+		notes = append(notes, warningStyle.Render("Note deleted. Press any key to continue."))
 
 	default:
 	}
 
-	v := tea.NewView(s.String())
+	v := tea.NewView(lipgloss.JoinVertical(lipgloss.Left, notes...))
 
 	v.AltScreen = true
 
