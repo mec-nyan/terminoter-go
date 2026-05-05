@@ -31,6 +31,20 @@ func LoadNotes(file string) (*Data, error) {
 	return &data, nil
 }
 
+func SaveNotes(data *Data, file string) error {
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(file, jsonData, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 type Loader struct {
 	Data
 	error

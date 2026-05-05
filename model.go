@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"unicode"
 
@@ -132,7 +133,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					// Focus the last added item.
 					m.Focused = len(m.Notes) - 1
 					m.UnSet()
-					// TODO: Save note to file!
+					// TODO: Better error handling.
+					err := SaveNotes(&m.Data, m.file)
+					if err != nil {
+						log.Fatalf("Error saving notes: %v", err)
+					}
 				} else {
 					// NOTE: Maybe a more descriptive name here...
 					m.Set()
