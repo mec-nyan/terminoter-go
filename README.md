@@ -3,4 +3,4 @@
 A simple note-taking app for the terminal.
 
 Demo:
-![](./screenshots/demo.gif)
+![simple_demo](./demos/banner.webp)
