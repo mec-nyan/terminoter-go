@@ -1,4 +1,4 @@
-module github.com/mec-nyan/notes-go
+module github.com/mec-nyan/terminoter-go
 
 go 1.26.2
 
