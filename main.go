@@ -10,7 +10,10 @@ func main() {
 	// App setup:
 	//
 	// Get command line arguments, if any:
-	opts, err := parseArgs()
+	opts := parseArgs()
+
+	// Initial setup (save location, configuration options, etc).
+	err := setup(&opts)
 	if err != nil {
 		log.Fatalf("initialisation error: %v", err)
 	}
