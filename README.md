@@ -1,6 +1,11 @@
 # Terminoter
 
-A cute, simple note-taking app for the terminal.
+[![go version](https://img.shields.io/badge/go-1.26.2-blue?style=for-the-badge)](https://go.dev/)
+[![bubbletea](https://img.shields.io/badge/tea-2.0.6-orchid?style=for-the-badge)](https://github.com/charmbracelet/bubbletea)
+[![lipgloss](https://img.shields.io/badge/lipgloss-2.0.3-mediumpurple?style=for-the-badge)](https://github.com/charmbracelet/lipgloss)
+
+
+A simple and cute note-taking app for the terminal.
 
 >[!NOTE]
 > **AI Disclosure:**
@@ -10,6 +15,23 @@ A cute, simple note-taking app for the terminal.
 Demo:
 ![simple_demo](./demos/demo.gif)
 
+## About
+
+***Terminoter*** is a note-taking app to help you keep all your notes at hand when working on the
+terminal/console.  It tries to be *nice to look at* without overcomplicating the **UI**.  Overall,
+I try to keep things *as simple as possible, but not simpler*.
+
+**Terminoter** is based on [**The Elm architecture** (TEA)](https://guide.elm-lang.org/)
+and powered by the awesome
+[**Charm**](https://charm.land/)'s libraries
+[**Bubbletea**](https://github.com/charmbracelet/bubbletea) and
+[**Lipgloss**](https://github.com/charmbracelet/lipgloss).
+
+## Installation
+
+```sh
+go install github.com/mec-nyan/terminoter-go@latest
+```
 
 ## Roadmap
 
