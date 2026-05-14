@@ -1,4 +1,4 @@
-package main
+package notes
 
 import (
 	"encoding/json"
@@ -47,5 +47,5 @@ func SaveNotes(data *Data, file string) error {
 
 type Loader struct {
 	Data
-	error
+	Err error
 }

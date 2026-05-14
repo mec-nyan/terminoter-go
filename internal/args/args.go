@@ -1,18 +1,18 @@
-package main
+package args
 
 import (
 	"flag"
 )
 
 type Options struct {
-	file string
+	File string
 }
 
-func parseArgs() Options {
+func ParseArgs() Options {
 	// For now we only have this option, but there may be more in the future.  I.e. we can select a different configuration file from CLI options.
 	file := flag.String("f", "", "file to read-write notes")
 
 	flag.Parse()
 
-	return Options{file: *file}
+	return Options{File: *file}
 }

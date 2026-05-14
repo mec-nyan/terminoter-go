@@ -1,4 +1,5 @@
-package main
+// model takes care of our app's state.
+package model
 
 import (
 	"fmt"
@@ -8,12 +9,15 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+
+	"github.com/mec-nyan/terminoter-go/internal/args"
+	"github.com/mec-nyan/terminoter-go/internal/notes"
 )
 
 // model is the state of our app.
 type model struct {
-	Options
-	Data
+	args.Options
+	notes.Data
 	Focused int
 	Mode
 	Size
@@ -58,7 +62,7 @@ func (c *ConfirmInsert) Confirm() bool {
 	return c.First && c.Second
 }
 
-func initialModel(opts Options) model {
+func InitialModel(opts args.Options) model {
 	return model{
 		Options: opts,
 		Size:    Size{80, 25},
@@ -67,10 +71,10 @@ func initialModel(opts Options) model {
 
 func (m model) Init() tea.Cmd {
 	return func() tea.Msg {
-		data, err := LoadNotes(m.file)
-		return Loader{
-			Data:  *data,
-			error: err,
+		data, err := notes.LoadNotes(m.File)
+		return notes.Loader{
+			Data: *data,
+			Err:  err,
 		}
 	}
 }
@@ -82,9 +86,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Width = msg.Width
 		m.Height = msg.Height
 
-	case Loader:
-		if msg.error != nil {
-			panic(fmt.Sprintf("error loading file: %v", msg.error))
+	case notes.Loader:
+		if msg.Err != nil {
+			panic(fmt.Sprintf("error loading file: %v", msg.Err))
 		}
 
 		m.Data = msg.Data
@@ -127,14 +131,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 				if m.Confirm() {
 					content := strings.TrimSpace(string(m.NewNote))
-					m.Notes = append(m.Notes, Note{Content: content})
+					m.Notes = append(m.Notes, notes.Note{Content: content})
 					m.NewNote = nil
 					m.Mode = Normal
 					// Focus the last added item.
 					m.Focused = len(m.Notes) - 1
 					m.UnSet()
 					// TODO: Better error handling.
-					err := SaveNotes(&m.Data, m.file)
+					err := notes.SaveNotes(&m.Data, m.File)
 					if err != nil {
 						log.Fatalf("error saving notes: %v", err)
 					}
@@ -194,7 +198,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.Focused--
 				}
 				// 2. Save changes to file.
-				err := SaveNotes(&m.Data, m.file)
+				err := notes.SaveNotes(&m.Data, m.File)
 				if err != nil {
 					log.Fatalf("error saving changes to file: %v", err)
 				}

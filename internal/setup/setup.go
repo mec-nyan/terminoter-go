@@ -1,9 +1,12 @@
-package main
+package setup
 
 import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
+	"github.com/mec-nyan/terminoter-go/internal/args"
+	"github.com/mec-nyan/terminoter-go/internal/notes"
 )
 
 const (
@@ -11,13 +14,13 @@ const (
 	DefaultConfigurationFile = "config.toml"
 )
 
-func setup(opts *Options) error {
+func Setup(opts *args.Options) error {
 	// Required: file to persist our notes.
-	if opts.file == "" {
-		opts.file = defaultSaveLocation()
+	if opts.File == "" {
+		opts.File = defaultSaveLocation()
 	}
 
-	err := ensureFileExists(opts.file)
+	err := ensureFileExists(opts.File)
 	if err != nil {
 		return err
 	}
@@ -92,7 +95,7 @@ func ensureFileExists(path string) error {
 
 	// If the file is empty, initialise it.
 	if info.Size() == 0 {
-		data := Data{}
+		data := notes.Data{}
 
 		content, err := json.Marshal(data)
 		if err != nil {
